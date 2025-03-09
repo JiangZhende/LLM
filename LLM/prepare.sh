@@ -1,0 +1,1 @@
+huggingface-cli download --dataset pleisto/wikipedia-cn-20230720-filtered --local-dir pleisto/wikipedia-cn-20230720-filtered
