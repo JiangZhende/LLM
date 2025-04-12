@@ -35,6 +35,11 @@ class ModelArguments:
         default=8,
         metadata={"help": "transformer num_attention_heads"}
     )
+    num_key_value_heads: Optional[int] = field(
+        default=8,
+        metadata={"help": "num_key_value_heads"}
+    )
+
     intermediate_size: Optional[int] = field(
         default=1048,
         metadata={"help": "intermediate_size"}
@@ -71,7 +76,7 @@ def get_bin_files_abs_paths(directory):
     bin_files_paths = []
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endwith(".bin"):
+            if file.endswith(".bin"):
                 bin_files_paths.append(os.path.abspath(os.path.join(root, file)))
     
     return bin_files_paths
@@ -108,10 +113,12 @@ def main():
         vocab_size=model_args.vocab_size,
         hidden_size=model_args.hidden_size,
         intermediate_size=model_args.intermediate_size,
-        num_attention_heads=model_args.num_attention_head,
+        num_attention_heads=model_args.num_attention_heads,
         num_hidden_layers=model_args.num_hidden_layers,
         rope_theta=model_args.rope_theta,
-        max_position_embeddings=model_args.max_position_embeddings,)
+        max_position_embeddings=model_args.max_position_embeddings,
+        num_key_value_heads=model_args.num_key_value_heads)
+    print(config)
     model = Qwen2ForCausalLM(config)
     model.to(device)
 
@@ -123,6 +130,7 @@ def main():
     ###################
 
     data_path_list = get_bin_files_abs_paths(script_args.dataset_dir_or_path)
+    print(f"数据路径列表长度: {len(data_path_list)}, 内容: {data_path_list}")
     if len(data_path_list) == 0:
         logger.error("***************NO INPUT DATA**********************")
     
