@@ -75,10 +75,6 @@ def get_bin_files_abs_paths(directory):
                 bin_files_paths.append(os.path.abspath(os.path.join(root, file)))
     
     return bin_files_paths
-def data_collator_fn(examples):
-    pass
-
-
 
 
 def main():
