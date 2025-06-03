@@ -5,6 +5,8 @@ import jsonlines
 import torch
 from torch.utils.data import Dataset
 from typing import Dict
+import datasets
+from datasets import load_dataset
 
 class PTMDataset(Dataset):
     def __init__(self, data_path_list, max_length=512, ) -> None:
@@ -100,3 +102,75 @@ class SFTDataset(Dataset):
             processed_example = self.preprocessing(self.data[index])
 
         return processed_example
+
+
+def load_dpo_dataset(
+    data_path: str,
+    max_length=256,
+    sanity_check: bool = False,
+    num_proc=24,
+    system: str = "你是由wdndev开发的个人助手。",
+) -> datasets.Dataset:
+    """Load the stack-exchange-paired dataset from Hugging Face and convert it to the necessary format.
+
+    The dataset is converted to a dictionary with the following structure:
+    {
+        'prompt': List[str],
+        'chosen': List[str],
+        'rejected': List[str],
+    }
+
+    Prompts are structured as follows:
+      "Question: " + <prompt> + "\n\nAnswer: "
+    """
+    dataset = load_dataset(
+        'json',
+        data_files=data_path,
+        split="train",
+        # cache_dir=cache_dir,
+        # data_dir=data_dir,
+    )
+    original_columns = dataset.column_names
+
+    if sanity_check:
+        dataset = dataset.select(range(min(len(dataset), 1000)))
+
+    def preprocess_function(examples) -> Dict[str, str]:
+        prompt_txt = system
+        # assistant_chosen_txt = examples["chosen"]
+        # assistant_rejected_txt = examples["rejected"]
+
+        prompt_list = []
+        for question in examples["prompt"]:
+            prompt ="\n".join(["<|system|>", system.strip(), 
+                            "<|user|>", question.strip(), 
+                            "<|assistant|>"]).strip() + "\n"
+            prompt_list.append(prompt)
+
+        return {
+            "prompt": prompt_list,
+            "chosen": examples["chosen"],
+            "rejected": examples["rejected"],
+        }
+        
+        # return {
+        #     "prompt": ["Question: " + question + "\n\nAnswer: " for question in examples["prompt"]],
+        #     "chosen": examples["chosen"],
+        #     "rejected": examples["rejected"],
+        # }
+
+    dataset_map = dataset.map(
+        preprocess_function,
+        batched=True,
+        num_proc=num_proc,
+        remove_columns=original_columns,
+    )
+
+    dataset_map = dataset_map.filter(
+        lambda x: len(x["prompt"]) + len(x["chosen"]) <= max_length
+        and len(x["prompt"]) + len(x["rejected"]) <= max_length
+    )
+
+    # dataset_map.set_format(type="torch")
+
+    return dataset_map

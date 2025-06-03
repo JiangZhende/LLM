@@ -60,7 +60,7 @@ class ModelArguments:
 @dataclass
 class ScriptArguments:
     dataset_dir_or_path: Optional[str] = field(
-        default="data/pre_train",
+        default="dataset/pre_train",
         metadata={"help": "save pretrain *binfile dir"}
     )
     resume: Optional[bool] = field(
@@ -84,6 +84,7 @@ def get_bin_files_abs_paths(directory):
 
 def main():
     parser = HfArgumentParser((ModelArguments, ScriptArguments, TrainingArguments))
+    print(parser.parse_args())
     model_args, script_args, training_args = parser.parse_args_into_dataclasses()
     
     logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",

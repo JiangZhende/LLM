@@ -133,7 +133,7 @@ def process_baidu_baike(input_dir, tokenizer):
         except:
             pass
         for per in line["sections"]:
-            text += per["title"] + ": " + line["summary"]
+            text += per["title"] + ": " + line["content"]
         text_id = tokenizer.encode(text, add_special_tokens=False)
         text_id.append(tokenizer.special_tokens["<eos>"])
         if len(text_id) > 5:

@@ -1,13 +1,16 @@
 #!/bin/bash
 
+#启用调试模式
 set -x
 
+#查找并终止与给定参数匹配的进程
 function killall {
     echo `ps -ef | grep $1 | grep -v grep | awk '{print $2}'`
     ps -ef | grep $1 | grep -v grep | awk '{print $2}'  | xargs kill
 }
 
 export CUDA_VISIBLE_DEVICES=1
+export PYTORCH_ENABLE_MPS_FALLBACK=1
 
 N_NODES=1
 N_GPUS=1
@@ -30,8 +33,10 @@ SEED=12
 DS_DTYPE="fp32"
 RESUME="False"
 
-DATASET_DIR_OR_PATH="datasets"
+DATASET_DIR_OR_PATH="dataset"
 BASE_MODEL_PATH="test"
+
+DEEPSPEED="False"
 
 MODEL_SIZE="16m"
 MODEL_NAME="${MODE}_tiny_llm_${MODEL_SIZE}"
@@ -58,10 +63,13 @@ if [ $DS_DTYPE = "fp16" ];then
 elif [ $DS_DTYPE = "bf16" ];then
     TRAIN_ARGS+=" \
         --bf16 \
-        --embedding-weights-in-fp32 \
         "
     DS_FP16=false
     DS_BF16=true
+    GAS_DTYPE="fp32"
+elif [ $DS_DTYPE = "fp32" ];then
+    DS_FP16=false
+    DS_BF16=false
     GAS_DTYPE="fp32"
 fi
 
@@ -109,7 +117,6 @@ EOT
 TRAIN_ARGS+=" \
     --seed ${SEED} \
     --output_dir ${OUTPUT_DIR} \
-    --deepspeed ${DS_CONFIG_JSON} \
     --overwrite_output_dir \
     --per_device_train_batch_size ${MBS} \
     --gradient_accumulation_steps ${GAS} \
@@ -134,6 +141,11 @@ TRAIN_ARGS+=" \
     --save_safetensors False \
     --ddp_find_unused_parameters False \
 "
+if [$DEEPSPEED == "True"];then
+    Train_ARGS+="\
+    --deepspeed ${DS_CONFIG_JSON} \
+    "
+fi
 
 if [[ $MODEL_SIZE == "16m" ]];then
     HIDDEN_SIZE=120
