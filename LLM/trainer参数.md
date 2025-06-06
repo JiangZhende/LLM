@@ -125,3 +125,26 @@
 
 **fp16_backend** (str, optional)- 这个参数被删除。
 
+**fp16_opt_level** (str, optional)- 针对fp16训练，Apex AMP优化等级选择O0，O1，O2，O3.
+
+**fp16_backend** (str, optional)- 这个参数已经剥离。
+
+**half_precision_backend** (str, optional)- 后端使用混合精度训练。从auto，apex，cpu_amp中选择。
+
+**bf16_full_eval** (bool, optional)- 是否使用完整的bf16测试而不是32bit。
+
+**tf32** (bool, optional)- 是否启用TF32模式，在Ampere和新的GPU架构中可用。
+
+**local_rank** (int, optional)- 分布式训练的rank。
+
+**ddp_backend** (str, optional)- 后端使用的分布式训练引擎。nccl，mpi，ccl，gloo，hccl。
+
+**tpu_num_cores** (int, optional)- 使用TPU训练时，使用的TPU核数量。
+
+**dataloader_drop_last** (bool, optional)- 是否删除最后一个不完整的批处理。
+
+**eval_steps** (int or float, optional)- 如果eval_strategy=steps，两次测试之间的步数更新。
+
+**dataloader_num_workers** (int, optional)- 用于数据加载的子进程。
+
+**past_index** (int, optional)- 像TransformerXL和XLNet这样的模型，利用过去的隐藏状态预测。
