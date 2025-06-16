@@ -27,6 +27,10 @@ class ModelArguments:
         default=512,
         metadata={"help": "hidden_size"}
     )
+    intermediate_size: Optional[int] = field(
+        default=2752,
+        metadata={"help": "Dimension of the MLP"}
+    )
     num_hidden_layers: Optional[int] = field(
         default=8,
         metadata={"help": "num_hidden_layers"}
@@ -40,9 +44,9 @@ class ModelArguments:
         metadata={"help": "num_key_value_heads"}
     )
 
-    intermediate_size: Optional[int] = field(
-        default=1048,
-        metadata={"help": "intermediate_size"}
+    hidden_act: Optional[str] = field(
+        default="silu",
+        metadata={"help": "activation function"}
     )
     rope_theta: Optional[float] = field(
         default=10000.0,
@@ -84,13 +88,14 @@ def get_bin_files_abs_paths(directory):
 
 def main():
     parser = HfArgumentParser((ModelArguments, ScriptArguments, TrainingArguments))
-    print(parser.parse_args())
     model_args, script_args, training_args = parser.parse_args_into_dataclasses()
-    
+
     logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
                         datefmt="%m/%d/%Y %H:%M:%S",
                         level=logging.WARN,
                         handlers=[logging.StreamHandler(sys.stdout)])
+    logger.info(f"Model Args: \n{model_args}\nScript Args: \n{script_args}\nTraining Args: \n{training_args}")
+    
     if training_args.should_log:
         transformers.utils.logging.set_verbosity_info()
     
@@ -118,8 +123,10 @@ def main():
         num_hidden_layers=model_args.num_hidden_layers,
         rope_theta=model_args.rope_theta,
         max_position_embeddings=model_args.max_position_embeddings,
-        num_key_value_heads=model_args.num_key_value_heads)
-    print(config)
+        num_key_value_heads=model_args.num_key_value_heads,
+        hidden_act=model_args.hidden_act)
+    logger.info(f"Model Config:\n{config}")
+
     model = Qwen2ForCausalLM(config)
     model.to(device)
 
@@ -127,11 +134,11 @@ def main():
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logger.info(f"总参数: {total_params}, {total_params/2**20:.2f}M params")
-    logger.info(f"可训练参数: {trainable_params}")
+    logger.info(f"可训练参数: {trainable_params}, {trainable_params/2**20:.2f}M params")
     ###################
 
     data_path_list = get_bin_files_abs_paths(script_args.dataset_dir_or_path)
-    print(f"数据路径列表长度: {len(data_path_list)}, 内容: {data_path_list}")
+    logger.info(f"数据路径列表长度: {len(data_path_list)}, 内容: {data_path_list}")
     if len(data_path_list) == 0:
         logger.error("***************NO INPUT DATA**********************")
     
