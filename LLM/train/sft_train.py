@@ -81,6 +81,8 @@ def main():
     logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", datefmt="%m/%d/%Y %H:%M:%S",
                         level=logging.WARN,
                         handlers=[logging.StreamHandler(sys.stdout)])
+    logger.info(f"Script Args: \n{script_args}\nTraining Args: \n{training_args}")
+
     if training_args.should_log:
         transformers.utils.logging.set_verbosity_info()
     
@@ -107,24 +109,25 @@ def main():
         model_max_length=model_args.max_position_embeddings
     )
 
-    config = transformers.AutoConfig.from_pretrained(
-        script_args.base_model_path,
-        trust_remote_code=True
-    )
-    config.use_cache=False
+    # config = transformers.AutoConfig.from_pretrained(
+    #     script_args.base_model_path,
+    #     trust_remote_code=True
+    # )
+    # config.use_cache=False
 
     model = AutoModelForCausalLM.from_pretrained(
         script_args.base_model_path,
-        config=config,
+        # config=config,
         trust_remote_code=True
     )
+    model.config.use_cache=False
     model.to(device)
 
     ##################
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logger.info(f"总参数: {total_params}, {total_params/2**20:.2f}M params")
-    logger.info(f"可训练参数: {trainable_params}")
+    logger.info(f"可训练参数: {trainable_params}, {trainable_params/2**20:.2f}M params")
     #################
 
     sft_dataset = SFTDataset(
