@@ -19,36 +19,36 @@ from tiny_dataset import SFTDataset
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class ModelArguments:
-    hidden_size: Optional[int] = field(
-        default=512,
-        metadata={"help": "hidden_size"}
-    )
-    num_hidden_layers: Optional[int] = field(
-        default=8,
-        metadata={"help": "num_hidden_layers"}
-    )
-    num_attention_heads: Optional[int] = field(
-        default=8,
-        metadata={"help": "num_attention_heads"}
-    )
-    intermediate_size: Optional[int] = field(
-        default=1408,
-        metadata={"help": "intermediate_size"}
-    )
-    rope_theta: Optional[float] = field(
-        default=10000.0,
-        metadata={"help": "rope_theta"}
-    )
-    max_position_embeddings: Optional[int] = field(
-        default=1024,
-        metadata={"help": "max_position_embeddings"}
-    )
-    vocab_size: Optional[int] = field(
-        default=64798,
-        metadata={"help": "vocab_size"}
-    )
+# @dataclass
+# class ModelArguments:
+#     hidden_size: Optional[int] = field(
+#         default=512,
+#         metadata={"help": "hidden_size"}
+#     )
+#     num_hidden_layers: Optional[int] = field(
+#         default=8,
+#         metadata={"help": "num_hidden_layers"}
+#     )
+#     num_attention_heads: Optional[int] = field(
+#         default=8,
+#         metadata={"help": "num_attention_heads"}
+#     )
+#     intermediate_size: Optional[int] = field(
+#         default=1408,
+#         metadata={"help": "intermediate_size"}
+#     )
+#     rope_theta: Optional[float] = field(
+#         default=10000.0,
+#         metadata={"help": "rope_theta"}
+#     )
+#     max_position_embeddings: Optional[int] = field(
+#         default=1024,
+#         metadata={"help": "max_position_embeddings"}
+#     )
+#     vocab_size: Optional[int] = field(
+#         default=64798,
+#         metadata={"help": "vocab_size"}
+#     )
 
 @dataclass
 class ScriptArguments:
@@ -75,8 +75,8 @@ def data_collator_fn(examples):
     return data_dict
 
 def main():
-    parser = HfArgumentParser((ModelArguments, ScriptArguments, TrainingArguments))
-    model_args, script_args, training_args = parser.parse_args_into_dataclasses()
+    parser = HfArgumentParser((ScriptArguments, TrainingArguments))
+    script_args, training_args = parser.parse_args_into_dataclasses()
 
     logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", datefmt="%m/%d/%Y %H:%M:%S",
                         level=logging.WARN,
@@ -102,11 +102,20 @@ def main():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
+    model = AutoModelForCausalLM.from_pretrained(
+        script_args.base_model_path,
+        # config=config,
+        trust_remote_code=True
+    )
+    model.config.use_cache=False
+    model.to(device)
+
+    max_position_embeddings = model.config.max_position_embeddings
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         script_args.base_model_path,
         use_fast=False,
         trust_remote_code=True,
-        model_max_length=model_args.max_position_embeddings
+        model_max_length=max_position_embeddings
     )
 
     # config = transformers.AutoConfig.from_pretrained(
@@ -115,13 +124,6 @@ def main():
     # )
     # config.use_cache=False
 
-    model = AutoModelForCausalLM.from_pretrained(
-        script_args.base_model_path,
-        # config=config,
-        trust_remote_code=True
-    )
-    model.config.use_cache=False
-    model.to(device)
 
     ##################
     total_params = sum(p.numel() for p in model.parameters())
@@ -133,7 +135,7 @@ def main():
     sft_dataset = SFTDataset(
         script_args.dataset_dir_or_path,
         tokenizer,
-        model_args.max_position_embeddings
+        max_position_embeddings
     )
 
     trainer = Trainer(

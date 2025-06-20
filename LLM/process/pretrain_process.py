@@ -168,8 +168,8 @@ def merge_bin(data_path_list: list):
     with open("./data/pretrain_data.bin", "wb") as f:
         f.write(arr.tobytes())
 if __name__ == "__main__":
-    tokenizer = ChatGLMTokenizer(vocab_file="/Users/likun/code/LLM/glm3_tokenizer/tokenizer.model")
-    process_wiki_clean("/Users/likun/code/LLM/datasets/wikipedia-cn-20230720-filtered.json", tokenizer)
+    tokenizer = ChatGLMTokenizer(vocab_file="glm3_tokenizer/tokenizer.model")
+    process_wiki_clean("datasets/wikipedia-cn-20230720-filtered.json", tokenizer)
     process_webnovel("datasets/webnovel-chinese/data", tokenizer)
     process_zhihu("datasets/wangrui6/Zhihu-KOL/data", tokenizer)
     process_tigerbot_part("datasets/TigerResearch/pretrain_zh", tokenizer)

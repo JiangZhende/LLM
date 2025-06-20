@@ -9,34 +9,35 @@ function killall {
     ps -ef | grep $1 | grep -v grep | awk '{print $2}'  | xargs kill
 }
 
-export CUDA_VISIBLE_DEVICES=1
-export PYTORCH_ENABLE_MPS_FALLBACK=1
+export CUDA_VISIBLE_DEVICES=1 #指定GPU
+export PYTORCH_ENABLE_MPS_FALLBACK=1 #启用PyTorch的MPS，用于macOS上的GPU加速
 
-N_NODES=1
-N_GPUS=1
-MBS=32 #单卡bs
+N_NODES=1 #节点数量
+N_GPUS=1 #每个节点的GPU数量
+MBS=32 #单卡bs批次
 GAS=1 #梯度累积
 GRAD_CLIP=1 #梯度剪裁
-RANK=0
-MASTER_ADDR=`hostname -i`
-MASTER_PORT=9902
+RANK=0 #设置当前节点的排名为0
+MASTER_ADDR=`hostname -i` #获取当前主机的IP地址作为主节点地址
+MASTER_PORT=9902 
 
-LR=3e-4
+LR=3e-4 
 LR_SCHEDULER_TYPE="cosine"
 WARMUP_RATION=0.05
 
 TRAIN_EPOCHS=5
 LOGGING_STEPS=100
-CKPT_SAVE_STEPS=10000
+CKPT_SAVE_STEPS=10000 #每10000步保存一次检查点
 
 SEED=12
-DS_DTYPE="fp32"
-RESUME="False"
+DS_DTYPE="fp32" #DeepSpeed的数据类型为fp32
+RESUME="False" #是否从检查点恢复训练
 
-DATASET_DIR_OR_PATH="dataset"
-BASE_MODEL_PATH="test"
+MODE="ptm"
+DATASET_DIR_OR_PATH="dataset" #数据集路径
+BASE_MODEL_PATH="test" #设置基础模型路径
 
-DEEPSPEED="False"
+DEEPSPEED="False" #是否使用DeepSpeed
 
 MODEL_SIZE="16m"
 MODEL_NAME="${MODE}_tiny_llm_${MODEL_SIZE}"
@@ -45,7 +46,7 @@ OUTPUT_DIR="outputs/ckpt/${MODEL_NAME}_epoch${TRAIN_EPOCHS}"
 mkdir -p $OUTPUT_DIR
 TRAIN_LOG="${OUTPUT_DIR}/train_$(date"+%Y%m%d%H%M").log"
 
-TB_DIR="outputs/tensorboard/${MODEL_NAME}_epoch${TRAIN_EPOCHS}"
+TB_DIR="outputs/tensorboard/${MODEL_NAME}_epoch${TRAIN_EPOCHS}" #TensorBoard日志目录
 mkdir -p $TB_DIR
 
 TRAIN_ARGS=""
