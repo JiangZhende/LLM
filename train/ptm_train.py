@@ -144,7 +144,7 @@ def main():
     logger.info(f"数据路径列表长度: {len(data_path_list)}, 内容: {data_path_list}")
     if len(data_path_list) == 0:
         logger.error("***************NO INPUT DATA**********************")
-    
+
     train_ds = PTMDataset(data_path_list, max_length=model_args.max_position_embeddings)
     trainer = Trainer(
         model=model,

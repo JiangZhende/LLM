@@ -139,7 +139,7 @@ TRAIN_ARGS+=" \
     --save_steps ${CKPT_SAVE_STEPS} \
     --ddp_timeout 30000 \
     --logging_first_step True \
-    --save_safetensors False \
+    --save_safetensors True \
     --ddp_find_unused_parameters False \
 "
 if [$DEEPSPEED == "True"];then
