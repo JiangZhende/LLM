@@ -151,7 +151,11 @@ def main():
         args=training_args,
         train_dataset=train_ds
     )
+    # 开始训练
     trainer.train(script_args.resume)
+    # trainer.train()
+    trainer.save_model()  # 保存模型
+    tokenizer.save_pretrained(output_path)  # 保存分词器
     
     torch.save(model.state_dict(), "{}/last_model.pth".format(training_args.output_dir))
     last_model_dir = os.path.join(training_args.output_dir, "last_ptm_model")
