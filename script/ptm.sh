@@ -9,12 +9,12 @@ function killall {
     ps -ef | grep $1 | grep -v grep | awk '{print $2}'  | xargs kill
 }
 
-export CUDA_VISIBLE_DEVICES=1 #指定GPU
+# export CUDA_VISIBLE_DEVICES=1 #指定GPU
 export PYTORCH_ENABLE_MPS_FALLBACK=1 #启用PyTorch的MPS，用于macOS上的GPU加速
 
 N_NODES=1 #节点数量
 N_GPUS=1 #每个节点的GPU数量
-MBS=32 #单卡bs批次
+MBS=16 #单卡bs批次
 GAS=1 #梯度累积
 GRAD_CLIP=1 #梯度剪裁
 RANK=0 #设置当前节点的排名为0
@@ -25,7 +25,7 @@ LR=3e-4
 LR_SCHEDULER_TYPE="cosine"
 WARMUP_RATION=0.05
 
-TRAIN_EPOCHS=5
+TRAIN_EPOCHS=1
 LOGGING_STEPS=100
 CKPT_SAVE_STEPS=10000 #每10000步保存一次检查点
 
@@ -34,10 +34,10 @@ DS_DTYPE="fp32" #DeepSpeed的数据类型为fp32
 RESUME="False" #是否从检查点恢复训练
 
 MODE="ptm"
-DATASET_DIR_OR_PATH="dataset" #数据集路径
+DATASET_DIR_OR_PATH="datasets/pretrain" #数据集路径
 BASE_MODEL_PATH="test" #设置基础模型路径
 
-DEEPSPEED="False" #是否使用DeepSpeed
+DEEPSPEED="True" #是否使用DeepSpeed
 
 MODEL_SIZE="16m"
 MODEL_NAME="${MODE}_tiny_llm_${MODEL_SIZE}"

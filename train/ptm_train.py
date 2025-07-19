@@ -112,7 +112,10 @@ def main():
     )
 
     set_seed(training_args.seed)
-
+    print("CUDA available:", torch.cuda.is_available())
+    print("CUDA device count:", torch.cuda.device_count())
+    print("Current device:", torch.cuda.current_device())
+    print("Device name:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "None")
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     config = Qwen2Config(
@@ -128,7 +131,7 @@ def main():
     logger.info(f"Model Config:\n{config}")
 
     model = Qwen2ForCausalLM(config)
-    model.to(device)
+    # model.to(device)
 
     ###################
     total_params = sum(p.numel() for p in model.parameters())
