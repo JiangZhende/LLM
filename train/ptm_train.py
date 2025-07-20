@@ -112,10 +112,10 @@ def main():
     )
 
     set_seed(training_args.seed)
-    print("CUDA available:", torch.cuda.is_available())
-    print("CUDA device count:", torch.cuda.device_count())
-    print("Current device:", torch.cuda.current_device())
-    print("Device name:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "None")
+    logger.info(f"CUDA available: {torch.cuda.is_available()}")
+    logger.info(f"CUDA device count: {torch.cuda.device_count()}")
+    logger.info(f"Current device: {torch.cuda.current_device()}")
+    logger.info(f"Device name: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'}")
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     config = Qwen2Config(
@@ -155,12 +155,12 @@ def main():
     trainer.train(script_args.resume)
     # trainer.train()
     trainer.save_model()  # 保存模型
-    tokenizer.save_pretrained(output_path)  # 保存分词器
+    # tokenizer.save_pretrained(output_path)  # 保存分词器
     
-    torch.save(model.state_dict(), "{}/last_model.pth".format(training_args.output_dir))
-    last_model_dir = os.path.join(training_args.output_dir, "last_ptm_model")
-    os.makedirs(last_model_dir, exist_ok=True)
-    model.save_pretrained(last_model_dir, safe_serialization=False)
+    # torch.save(model.state_dict(), "{}/last_model.pth".format(training_args.output_dir))
+    # last_model_dir = os.path.join(training_args.output_dir, "last_ptm_model")
+    # os.makedirs(last_model_dir, exist_ok=True)
+    # model.save_pretrained(last_model_dir, safe_serialization=False)
 
 if __name__ == "__main__":
     main()

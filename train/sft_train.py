@@ -16,6 +16,8 @@ from transformers import (
 )
 import datasets
 from tiny_dataset import SFTDataset
+from peft import LoraConfig, get_peft_model, TaskType
+# from glm3_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 logger = logging.getLogger(__name__)
 
 
@@ -64,6 +66,31 @@ class ScriptArguments:
         default="",
         metadata={"help": "SFT train, the base model path"}
     )
+    tokenizer_path: Optional[str] = field(
+        default="",
+        metadata={"help": "SFT train, the tokenizer base path"}
+    )
+    # LoRA配置参数
+    use_lora: Optional[bool] = field(
+        default=True,
+        metadata={"help": "是否使用LoRA训练"}
+    )
+    lora_r: Optional[int] = field(
+        default=16,
+        metadata={"help": "LoRA rank"}
+    )
+    lora_alpha: Optional[int] = field(
+        default=32,
+        metadata={"help": "LoRA alpha参数"}
+    )
+    lora_dropout: Optional[float] = field(
+        default=0.1,
+        metadata={"help": "LoRA dropout"}
+    )
+    lora_target_modules: Optional[str] = field(
+        default="q_proj,v_proj",
+        metadata={"help": "LoRA目标模块，用逗号分隔"}
+    )
 
 def data_collator_fn(examples):
     input_ids = torch.stack([example[0] for example in examples])
@@ -108,15 +135,37 @@ def main():
         trust_remote_code=True
     )
     model.config.use_cache=False
-    model.to(device)
+    # model.to(device)
+
+    # 应用LoRA配置
+    if script_args.use_lora:
+        logger.info("正在应用LoRA配置...")
+        target_modules = script_args.lora_target_modules.split(",")
+        lora_config = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            inference_mode=False,
+            r=script_args.lora_r,
+            lora_alpha=script_args.lora_alpha,
+            lora_dropout=script_args.lora_dropout,
+            target_modules=target_modules,
+        )
+        model = get_peft_model(model, lora_config)
+        model.print_trainable_parameters()
+        logger.info("LoRA配置应用完成")
 
     max_position_embeddings = model.config.max_position_embeddings
     tokenizer = transformers.AutoTokenizer.from_pretrained(
-        script_args.base_model_path,
+        script_args.tokenizer_path,
         use_fast=False,
         trust_remote_code=True,
         model_max_length=max_position_embeddings
     )
+    # tokenizer = ChatGLMTokenizer.from_pretrained(
+    #     script_args.base_model_path,
+    #     use_fast=False,
+    #     trust_remote_code=True,
+    #     model_max_length=max_position_embeddings
+    # )
 
     # config = transformers.AutoConfig.from_pretrained(
     #     script_args.base_model_path,
@@ -138,6 +187,12 @@ def main():
         max_position_embeddings
     )
 
+    logger.info(f"CUDA available: {torch.cuda.is_available()}")
+    if torch.cuda.is_available():
+        logger.info(f"CUDA device count: {torch.cuda.device_count()}")
+        logger.info(f"Current device: {torch.cuda.current_device()}")
+        logger.info(f"Device name: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'}")
+        
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -145,10 +200,11 @@ def main():
     )
     
     trainer.train(script_args.resume)
-    last_model_dir = os.path.join(training_args.output_dir, "last_sft_model")
-    os.makedirs(last_model_dir, exist_ok=True)
-    tokenizer.save_pretrained(last_model_dir)
-    trainer.save_model(last_model_dir)
+    trainer.save_model()
+    # last_model_dir = os.path.join(training_args.output_dir, "last_sft_model")
+    # os.makedirs(last_model_dir, exist_ok=True)
+    # tokenizer.save_pretrained(last_model_dir)
+    # trainer.save_model(last_model_dir)
 
 if __name__ == "__main__":
     main()
