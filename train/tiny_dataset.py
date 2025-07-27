@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import random
 import jsonlines
@@ -8,6 +9,41 @@ from typing import Dict
 import datasets
 from datasets import load_dataset
 
+class StreamingPTMDataset(Dataset):
+    def __init__(self, data_path_list, max_length=512):
+        super().__init__()
+        self.data_path_list = data_path_list
+        self.max_length = max_length
+        self.index_map = []  # 每个样本对应哪个文件、偏移
+
+        for file_idx, path in enumerate(data_path_list):
+            file_size = os.path.getsize(path)
+            num_tokens = file_size // 2  # uint16 占 2 字节
+            num_samples = num_tokens // max_length
+
+            for i in range(num_samples):
+                self.index_map.append((file_idx, i * max_length))
+
+        print(f"Streaming dataset initialized with {len(self.index_map)} samples.")
+
+    def __len__(self):
+        return len(self.index_map)
+
+    def __getitem__(self, idx):
+        file_idx, offset = self.index_map[idx]
+        path = self.data_path_list[file_idx]
+
+        with open(path, "rb") as f:
+            f.seek(offset * 2)  # 每个 uint16 是 2 字节
+            raw = f.read(self.max_length * 2)
+            sample = np.frombuffer(raw, dtype=np.uint16)
+
+        input_ids = torch.LongTensor(sample.astype(np.int64))
+        return {
+            "input_ids": input_ids,
+            "labels": input_ids.clone()
+        }
+    
 class PTMDataset(Dataset):
     def __init__(self, data_path_list, max_length=512, ) -> None:
         super(PTMDataset, self).__init__()

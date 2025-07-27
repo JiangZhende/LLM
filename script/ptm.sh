@@ -14,7 +14,7 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1 #启用PyTorch的MPS，用于macOS上的GPU
 
 N_NODES=1 #节点数量
 N_GPUS=1 #每个节点的GPU数量
-MBS=16 #单卡bs批次
+MBS=4 #单卡bs批次
 GAS=1 #梯度累积
 GRAD_CLIP=1 #梯度剪裁
 RANK=0 #设置当前节点的排名为0
@@ -34,12 +34,12 @@ DS_DTYPE="fp32" #DeepSpeed的数据类型为fp32
 RESUME="False" #是否从检查点恢复训练
 
 MODE="ptm"
-DATASET_DIR_OR_PATH="datasets/pretrain" #数据集路径
-BASE_MODEL_PATH="test" #设置基础模型路径
+DATASET_DIR_OR_PATH="datasets/pretrain/wdndev" #数据集路径
+BASE_MODEL_PATH="tinyllm" #设置基础模型路径
 
 DEEPSPEED="True" #是否使用DeepSpeed
 
-MODEL_SIZE="16m"
+MODEL_SIZE="92m"
 MODEL_NAME="${MODE}_tiny_llm_${MODEL_SIZE}"
 OUTPUT_DIR="outputs/ckpt/${MODEL_NAME}_epoch${TRAIN_EPOCHS}"
 

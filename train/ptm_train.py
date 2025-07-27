@@ -1,4 +1,5 @@
 import logging
+from random import random
 import numpy as np
 import os
 import glob
@@ -18,7 +19,7 @@ from transformers import (
     Trainer,
     
 )
-from tiny_dataset import PTMDataset
+from tiny_dataset import PTMDataset, StreamingPTMDataset
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -145,7 +146,8 @@ def main():
     if len(data_path_list) == 0:
         logger.error("***************NO INPUT DATA**********************")
 
-    train_ds = PTMDataset(data_path_list, max_length=model_args.max_position_embeddings)
+    train_ds = StreamingPTMDataset(data_path_list, max_length=model_args.max_position_embeddings)
+
     trainer = Trainer(
         model=model,
         args=training_args,
