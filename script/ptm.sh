@@ -14,7 +14,7 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1 #启用PyTorch的MPS，用于macOS上的GPU
 
 N_NODES=1 #节点数量
 N_GPUS=1 #每个节点的GPU数量
-MBS=4 #单卡bs批次
+MBS=16 #单卡bs批次
 GAS=1 #梯度累积
 GRAD_CLIP=1 #梯度剪裁
 RANK=0 #设置当前节点的排名为0
@@ -30,7 +30,7 @@ LOGGING_STEPS=100
 CKPT_SAVE_STEPS=10000 #每10000步保存一次检查点
 
 SEED=12
-DS_DTYPE="fp32" #DeepSpeed的数据类型为fp32
+DS_DTYPE="bf16" #DeepSpeed的数据类型为fp32
 RESUME="False" #是否从检查点恢复训练
 
 MODE="ptm"

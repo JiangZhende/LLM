@@ -13,8 +13,8 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1
 
 N_NODES=1
 N_GPUS=1
-MBS=4 # 单卡批次大小，LoRA训练可以使用更大的批次
-GAS=4 # 梯度累积
+MBS=16 # 单卡批次大小，LoRA训练可以使用更大的批次
+GAS=1 # 梯度累积
 GRAD_CLIP=1
 RANK=0
 MASTER_ADDR=`hostname -i`
@@ -29,17 +29,17 @@ LOGGING_STEPS=10
 CKPT_SAVE_STEPS=500
 
 SEED=42
-DS_DTYPE="fp32" # 使用bf16进行LoRA训练
+DS_DTYPE="bf16" # 使用bf16进行LoRA训练
 RESUME="False"
 
-MODE="sft_lora"
+MODE="sft" # SFT模式
 DATASET_DIR_OR_PATH="datasets/sft/sft_train/sft_data_test.jsonl" # SFT数据集路径
-BASE_MODEL_PATH="outputs/ckpt/ptm_tiny_llm_16m_epoch1/last_ptm_model" # 预训练模型路径
+BASE_MODEL_PATH="outputs/ckpt/ptm_tiny_llm_92m_epoch1/checkpoint-549071" # 预训练模型路径
 TOKENIZER_PATH="glm3_tokenizer"
 
-DEEPSPEED="False"
+DEEPSPEED="True" # 使用DeepSpeed进行LoRA训练
 
-MODEL_SIZE="16m"
+MODEL_SIZE="92m"
 MODEL_NAME="${MODE}_tiny_llm_${MODEL_SIZE}"
 OUTPUT_DIR="outputs/ckpt/${MODEL_NAME}_epoch${TRAIN_EPOCHS}"
 
@@ -151,7 +151,7 @@ fi
 
 # LoRA配置参数
 LORA_ARGS=" \
-    --use_lora True \
+    --use_lora False \
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.1 \

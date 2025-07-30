@@ -74,8 +74,11 @@ def process_tigerbot_sft(input_dir):
                     lines = infile.readlines()
                     
                 for line in tqdm(lines):
-                    json_obj = json.loads(line)  # 解析json字符串为python对象
-                    
+                    try:
+                        json_obj = json.loads(line)  # 解析json字符串为python对象
+                    except json.JSONDecodeError:
+                        print(f"Error decoding JSON in file {file_path} at line {idx}: {line}")
+                        continue
                     instruction = json_obj["instruction"]
                     input_str = json_obj["input"]
                     answer = json_obj["output"]
@@ -95,17 +98,18 @@ def process_tigerbot_sft(input_dir):
 
 if __name__=="__main__":
 
-    total_lines = process_bell_2m("datasets/sft/BelleGroup/train_2M_CN/train_2M_CN.json")
-    print("bell 2m: ", len(total_lines))
+    # total_lines = process_bell_2m("datasets/sft/BelleGroup/train_2M_CN/train_2M_CN.json")
+    # print("bell 2m: ", len(total_lines))
     # nlp_total_lines = process_nlp("corpus/sft_train/nlp/firefly-train-1.1M.jsonl")
     # print("nlp: ", len(nlp_total_lines))
     
     # total_lines.extend(nlp_total_lines)
     
-    # tigerbot_total_lines = process_tigerbot_sft("corpus/sft_train/tigerbot")
-    # print("tigerbot: ", len(tigerbot_total_lines))
+    total_lines = []
+    tigerbot_total_lines = process_tigerbot_sft("/root/LLM/datasets/sft/TigerResearch/pretrain_zh")
+    print("tigerbot: ", len(tigerbot_total_lines))
     
-    # total_lines.extend(tigerbot_total_lines)
+    total_lines.extend(tigerbot_total_lines)
 
     print("all: ", len(total_lines))
 
@@ -117,6 +121,6 @@ if __name__=="__main__":
     # 保存处理后的csv文件到对应的输出子文件夹
     output_file_path = os.path.join(output_subfolder, "sft_data_test.jsonl")
     # 将处理后的json对象写入新的jsonl文件
-    with open(output_file_path, 'w') as outfile:
+    with open(output_file_path, 'w', encoding='utf-8') as outfile:
         for line in total_lines:
             outfile.write(line)
