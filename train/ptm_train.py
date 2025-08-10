@@ -1,5 +1,6 @@
 import logging
 from random import random
+from matplotlib import pyplot as plt
 import numpy as np
 import os
 import glob
@@ -163,6 +164,26 @@ def main():
     # last_model_dir = os.path.join(training_args.output_dir, "last_ptm_model")
     # os.makedirs(last_model_dir, exist_ok=True)
     # model.save_pretrained(last_model_dir, safe_serialization=False)
+    def plot_loss(save_directory, log_history):
+        plt.switch_backend("agg")
+        key = "loss"
+        steps, metrics = [], []
+        for log_entry in log_history:
+            if key in log_entry:
+                steps.append(log_entry["step"])
+                metrics.append(log_entry[key])
+
+        plt.figure()
+        plt.plot(steps, metrics, color="#1f77b4", label="loss")
+        plt.title(f"Training {key} Curve")
+        plt.xlabel("Step")
+        plt.ylabel(key.capitalize())
+        plt.legend()
+        figure_path = os.path.join(save_directory, f"training_{key.replace('/', '_')}.png")
+        plt.savefig(figure_path, format="png", dpi=100)
+        print(f"Loss curve saved to {figure_path}")
+
+    plot_loss(training_args.output_dir, trainer.state.log_history)
 
 if __name__ == "__main__":
     main()

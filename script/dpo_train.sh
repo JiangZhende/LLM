@@ -14,7 +14,7 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1
 N_NODES=1
 N_GPUS=1
 MBS=4 # 单卡批次大小，LoRA训练可以使用更大的批次
-GAS=4 # 梯度累积
+GAS=1 # 梯度累积
 GRAD_CLIP=1
 RANK=0
 MASTER_ADDR=`hostname -i`
@@ -29,17 +29,17 @@ LOGGING_STEPS=10
 CKPT_SAVE_STEPS=500
 
 SEED=42
-DS_DTYPE="fp32" # 使用bf16进行LoRA训练
+DS_DTYPE="bf16" # 使用bf16进行LoRA训练
 RESUME="False"
 
 MODE="dpo"
 DATASET_DIR_OR_PATH="datasets/rlhf/rl_data.jsonl" # SFT数据集路径
-BASE_MODEL_PATH="outputs/ckpt/ptm_tiny_llm_16m_epoch1/last_ptm_model" # 预训练模型路径
+BASE_MODEL_PATH="outputs/ckpt/sft_tiny_llm_92m_epoch3/checkpoint-5000" # 预训练模型路径
 TOKENIZER_PATH="glm3_tokenizer"
 
-DEEPSPEED="False"
+DEEPSPEED="True"
 
-MODEL_SIZE="16m"
+MODEL_SIZE="92m"
 MODEL_NAME="${MODE}_tiny_llm_${MODEL_SIZE}"
 OUTPUT_DIR="outputs/ckpt/${MODEL_NAME}_epoch${TRAIN_EPOCHS}"
 
@@ -63,7 +63,7 @@ if [ $DS_DTYPE = "fp16" ];then
     GAS_DTYPE=$DS_DTYPE
 elif [ $DS_DTYPE = "bf16" ];then
     TRAIN_ARGS+=" \
-        --bf16 \
+        --bf16 true\
         "
     DS_FP16=false
     DS_BF16=true

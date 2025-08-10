@@ -3,8 +3,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from transformers.generation import GenerationConfig
 from glm3_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 tokenizer_path = "/root/LLM/glm3_tokenizer"
-# model_id = "/root/LLM/outputs/ckpt/ptm_tiny_llm_92m_epoch1/checkpoint-549071"
-model_id = "/root/LLM/outputs/ckpt/sft_tiny_llm_92m_epoch3/checkpoint-3"
+model_id = "/root/LLM/outputs/ckpt/ptm_tiny_llm_92m_epoch1/checkpoint-20000"
+# model_id = "/root/LLM/outputs/ckpt/dpo_tiny_llm_92m_epoch1/checkpoint-374"
 
 tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_remote_code=True)
@@ -12,11 +12,12 @@ model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_
 generation_config = GenerationConfig()
 sys_text = "你是由李小贱开发的个人助手。"
 # user_text = "世界上最大的动物是什么？"
-user_text = "介绍一下刘德华。"
-# user_text = "介绍一下中国。"
-input_txt = "\n".join(["<|system|>", sys_text.strip(), 
-                        "<|user|>", user_text.strip(), 
-                        "<|assistant|>"]).strip() + "\n"
+# user_text = "介绍一下刘德华。"
+user_text = "介绍一下中国。"
+input_txt = "\n".join([
+    "<|system|>", sys_text.strip(), 
+    "<|user|>", user_text.strip(), 
+    "<|assistant|>"]).strip() + "\n"
 
 generation_config.max_new_tokens = 200
 generation_config.repetition_penalty=10.0

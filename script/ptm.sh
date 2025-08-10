@@ -14,7 +14,7 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1 #启用PyTorch的MPS，用于macOS上的GPU
 
 N_NODES=1 #节点数量
 N_GPUS=1 #每个节点的GPU数量
-MBS=16 #单卡bs批次
+MBS=64 #单卡bs批次
 GAS=1 #梯度累积
 GRAD_CLIP=1 #梯度剪裁
 RANK=0 #设置当前节点的排名为0
@@ -34,7 +34,7 @@ DS_DTYPE="bf16" #DeepSpeed的数据类型为fp32
 RESUME="False" #是否从检查点恢复训练
 
 MODE="ptm"
-DATASET_DIR_OR_PATH="datasets/pretrain/wdndev" #数据集路径
+DATASET_DIR_OR_PATH="datasets/pretrain/" #数据集路径
 BASE_MODEL_PATH="tinyllm" #设置基础模型路径
 
 DEEPSPEED="True" #是否使用DeepSpeed
@@ -193,6 +193,19 @@ elif [[ $MODEL_SIZE == "440m" ]];then
     ROPE_THETA=10000.0
     MAX_POSITION_EMBEDDINGS=1024
     VOCAB_SIZE=64798
+elif [[ $MODEL_SIZE == "0.5b" ]];then
+    HIDDEN_SIZE=2048
+    NUM_HIDDEN_LAYERS=8
+    NUM_ATTENTION_HEADS=8
+    NUM_KEY_VALUE_HEADS=8
+    INTERMEDIATE_SIZE=2816
+    ROPE_THETA=10000.0
+    MAX_POSITION_EMBEDDINGS=1024
+    VOCAB_SIZE=64798
+
+else
+    echo "Unsupported model size: ${MODEL_SIZE}"
+    exit 1
 fi
 
 GPT_ARGS=" \

@@ -57,7 +57,7 @@ def main():
     )
 
     train_loader = torch.utils.data.DataLoader(
-        dpo_dataset.select(range(10)),
+        dpo_dataset,
         batch_size=train_args.per_device_train_batch_size,
         pin_memory=False,
         drop_last=False,
@@ -91,7 +91,7 @@ def main():
         model=model,
         ref_model=None,
         args=train_args,
-        train_dataset=dpo_dataset.select(range(10)),
+        train_dataset=dpo_dataset,
         eval_dataset=eval_dataset,
         processing_class=tokenizer,
         # max_prompt_length=.max_prompt_length,
@@ -125,6 +125,15 @@ def main():
         print(f"Loss curve saved to {figure_path}")
 
     plot_loss(train_args.output_dir, dpo_trainer.state.log_history)
+    # 训练完成后主动清理资源
+    import deepspeed
+    if isinstance(dpo_trainer.model, deepspeed.DeepSpeedEngine):
+        dpo_trainer.model.destroy()
+
+    import torch.distributed as dist
+
+    if dist.is_initialized():
+        dist.destroy_process_group()
 
 if __name__ == "__main__":
     main()
