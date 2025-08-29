@@ -106,7 +106,7 @@ if __name__=="__main__":
     # total_lines.extend(nlp_total_lines)
     
     total_lines = []
-    tigerbot_total_lines = process_tigerbot_sft("/root/LLM/datasets/sft/TigerResearch/pretrain_zh")
+    tigerbot_total_lines = process_tigerbot_sft("/root/LLM/datasets/sft/TigerResearch/sft_zh")
     print("tigerbot: ", len(tigerbot_total_lines))
     
     total_lines.extend(tigerbot_total_lines)

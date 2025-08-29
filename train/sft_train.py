@@ -18,6 +18,9 @@ import datasets
 from tiny_dataset import SFTDataset
 from peft import LoraConfig, get_peft_model, TaskType
 # from glm3_tokenizer.tokenization_chatglm import ChatGLMTokenizer
+from torch.backends.cuda import sdp_kernel
+# torch.backends.cudnn.enabled = False
+sdp_kernel(enable_flash=False, enable_mem_efficient=False, enable_math=True)
 logger = logging.getLogger(__name__)
 
 
@@ -132,7 +135,8 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(
         script_args.base_model_path,
         # config=config,
-        trust_remote_code=True
+        trust_remote_code=True,
+        attn_implementation="eager"
     )
     model.config.use_cache=False
     # model.to(device)

@@ -13,8 +13,8 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1
 
 N_NODES=1
 N_GPUS=1
-MBS=16 # 单卡批次大小，LoRA训练可以使用更大的批次
-GAS=1 # 梯度累积
+MBS=10 # 单卡批次大小，LoRA训练可以使用更大的批次
+GAS=2 # 梯度累积
 GRAD_CLIP=1
 RANK=0
 MASTER_ADDR=`hostname -i`
@@ -24,7 +24,7 @@ LR=5e-4 # LoRA训练通常使用更高的学习率
 LR_SCHEDULER_TYPE="cosine"
 WARMUP_RATION=0.1
 
-TRAIN_EPOCHS=3
+TRAIN_EPOCHS=1
 LOGGING_STEPS=10
 CKPT_SAVE_STEPS=500
 
@@ -34,7 +34,7 @@ RESUME="False"
 
 MODE="sft" # SFT模式
 DATASET_DIR_OR_PATH="datasets/sft/sft_train/sft_data_test.jsonl" # SFT数据集路径
-BASE_MODEL_PATH="outputs/ckpt/ptm_tiny_llm_92m_epoch1/checkpoint-549071" # 预训练模型路径
+BASE_MODEL_PATH="outputs/ckpt/ptm_tiny_llm_92m_epoch1/checkpoint-359935" # 预训练模型路径
 TOKENIZER_PATH="glm3_tokenizer"
 
 DEEPSPEED="True" # 使用DeepSpeed进行LoRA训练
@@ -78,6 +78,7 @@ cat <<EOT > $DS_CONFIG_JSON
 {
   "train_micro_batch_size_per_gpu": $MBS,
   "train_batch_size": "auto",
+  "gradient_accumulation_steps": 2,
   "gradient_clipping": ${GRAD_CLIP},
   "zero_optimization": {
     "stage": $ZERO_STAGE
