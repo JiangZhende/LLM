@@ -321,8 +321,22 @@ if __name__ == "__main__":
     # process_wiki_clean("datasets/pretrain/pleisto/wikipedia-cn-20230720-filtered/wikipedia-cn-20230720-filtered.json", tokenizer)
     # process_webnovel("datasets/pretrain/wdndev/webnovel-chinese/data", "glm3_tokenizer/tokenizer.model", 100000, 6)
     # process_zhihu("datasets/pretrain/wangrui6/Zhihu-KOL/data", "glm3_tokenizer/tokenizer.model", 100000, 6)
-    process_tigerbot("datasets/pretrain/TigerResearch/pretrain_zh/data", "glm3_tokenizer/tokenizer.model", 100000, 6)
+    # process_tigerbot("datasets/pretrain/TigerResearch/pretrain_zh/data", "glm3_tokenizer/tokenizer.model", 100000, 6)
     # process_baidubaike("/root/LLM/datasets/pretrain/xuqinyang/BaiduBaike-5.63M/", "glm3_tokenizer/tokenizer.model", 100000, 6) 
 
     # process_tigerbo_file("datasets/pretrain/TigerResearch/pretrain_zh/data/train-00006-of-00117-60d762f229f705bc.parquet",
     #                       "glm3_tokenizer/tokenizer.model", 10000, 6)
+
+    file_list = glob.glob(os.path.join("datasets/pretrain/TigerResearch/pretrain_zh/data", "*.bin"))
+    data_arr = []
+    count = 0
+    for data_path in tqdm(file_list):
+        with open(data_path, "rb") as f:
+            data = np.fromfile(f, dtype = np.uint16)
+            print(data.shape)
+            count += len(data)
+            # data_arr.append(data)
+            # break
+    print(count)
+    # 11794381405
+    # arr = np.concatenate(data_arr)

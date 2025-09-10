@@ -14,7 +14,7 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1 #启用PyTorch的MPS，用于macOS上的GPU
 
 N_NODES=1 #节点数量
 N_GPUS=1 #每个节点的GPU数量
-MBS=64 #单卡bs批次
+MBS=32 #单卡bs批次
 GAS=1 #梯度累积
 GRAD_CLIP=1 #梯度剪裁
 RANK=0 #设置当前节点的排名为0
