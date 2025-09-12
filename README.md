@@ -5,12 +5,12 @@
 ## 项目结构
 
 .
-├── glm3_tokenizer # tokenizer 目录
-├── prepare.sh # 数据集下载
-├── process # 数据处理
-├── requirement.txt
-├── script # 启动脚本
-├── train # 训练脚本
+├── glm3_tokenizer # tokenizer 目录  
+├── prepare.sh # 数据集下载  
+├── process # 数据处理  
+├── requirement.txt  
+├── script # 启动脚本. 
+├── train # 训练脚本. 
 
 ## 使用框架
 
@@ -27,6 +27,7 @@ pip install -r requirement.txt
 
 ## 数据准备
 预训练 TigerResearch/pretrain_zh
+
 微调 TigerResearch/sft_zh
 
 
